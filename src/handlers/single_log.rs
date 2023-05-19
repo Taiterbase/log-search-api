@@ -15,6 +15,7 @@ pub struct LogsRequest {
 }
 
 pub async fn log_lines(req: web::Query<LogsRequest>) -> Result<HttpResponse, io::Error> {
+    println!("single server request received");
     let path = format!("/var/log/{}", req.filename);
     let canonical_path = std::fs::canonicalize(&path)?;
 
@@ -58,7 +59,8 @@ pub async fn log_lines(req: web::Query<LogsRequest>) -> Result<HttpResponse, io:
         file.read_exact(&mut buf)?;
 
         let mut chunk_lines: Vec<String> = buf
-            // doesn't take into account other line endings
+            // will want to consider replacing \r\n with \n and/or \n with \r\n depending on the system.
+            // \n works for now since our output is consumed by browsers.
             .split(|b: &u8| *b == b'\n')
             .map(|s: &[u8]| String::from_utf8_lossy(s).into_owned())
             .collect();

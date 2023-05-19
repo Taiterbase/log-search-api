@@ -2,43 +2,33 @@ use actix_web::{web, HttpResponse, Result};
 use futures::stream::{FuturesUnordered, StreamExt};
 use serde::Deserialize;
 
+// todo: pull from a config file
+const SERVERS: [&str; 3] = ["localhost:8081", "localhost:8082", "localhost:8083"];
+
 #[derive(Deserialize)]
 pub struct MultiLogRequest {
-    servers: Vec<String>,
     filename: String,
     keyword: Option<String>,
     last: Option<usize>,
 }
 
 pub async fn multi_log_lines(
-    info: web::Query<MultiLogRequest>,
+    req: web::Query<MultiLogRequest>,
 ) -> Result<HttpResponse, actix_web::Error> {
-    let mut futures: FuturesUnordered<_> = info
-        .servers
+    println!("multi server request received");
+
+    let mut futures: FuturesUnordered<_> = SERVERS
         .iter()
         .map(|server| {
             let url = format!(
                 "http://{}/logs?filename={}&last={}&keyword={}",
                 server,
-                &info.filename,
-                &info.last.unwrap_or(0),
-                &info.keyword.as_ref().unwrap_or(&"".to_string())
+                &req.filename,
+                &req.last.unwrap_or(0),
+                &req.keyword.as_ref().unwrap_or(&"".to_string())
             );
-            let mut url = reqwest::Url::parse(&url).unwrap();
-            if let Some(keyword) = &info.keyword {
-                url.query_pairs_mut().append_pair("keyword", keyword);
-            }
-            if let Some(last) = info.last {
-                url.query_pairs_mut().append_pair("last", &last.to_string());
-            }
-
             async {
-                let resp = reqwest::get(url)
-                    .await
-                    .map_err(|err| actix_web::error::ErrorInternalServerError(err))?
-                    .json::<Vec<String>>()
-                    .await
-                    .map_err(|err| actix_web::error::ErrorInternalServerError(err))?;
+                let resp = reqwest::get(url).await.unwrap().text().await.unwrap();
                 Ok::<_, actix_web::Error>(resp)
             }
         })
