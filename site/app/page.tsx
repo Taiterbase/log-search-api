@@ -57,11 +57,9 @@ export default function Home() {
         }
       }).catch(err => {
         console.log(err)
-        setLogs([err])
       });
     } else {
       console.error(res);
-      setLogs([res.statusText]);
     }
   }
 
