@@ -13,7 +13,7 @@ struct LogsRequest {
     last: Option<usize>,
 }
 
-const CHUNK_SIZE: u64 = 2048;
+const CHUNK_SIZE: u64 = 8192;
 
 async fn log_lines(req: web::Query<LogsRequest>) -> Result<HttpResponse, io::Error> {
     let path = format!("/var/log/{}", req.filename);
@@ -53,7 +53,7 @@ async fn log_lines(req: web::Query<LogsRequest>) -> Result<HttpResponse, io::Err
             .collect();
 
         if !lines.is_empty() {
-            // The first line may be incomplete, append it to the last line of the next chunk
+            // the first line may be incomplete, append it to the last line of the next chunk
             let first_line = chunk_lines.pop().unwrap();
             let last_line: &mut String = lines.last_mut().unwrap();
             last_line.insert_str(0, &first_line);
@@ -64,6 +64,7 @@ async fn log_lines(req: web::Query<LogsRequest>) -> Result<HttpResponse, io::Err
         lines.append(&mut chunk_lines);
 
         // fast path to return the last N lines
+        // greatly reduces the amount of lines we need to traverse
         if let Some(last) = req.last {
             if lines.len() >= last {
                 break;
