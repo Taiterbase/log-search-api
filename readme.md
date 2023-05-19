@@ -2,6 +2,8 @@
 
 CLS is a log searching API that exposes one endpoing `/logs` that accepts a `filename`, `last`, and `keyword` query parameter. The `filename` is the name of the log file to search and the `last` parameter is the number of lines to return from the end of the file. `keyword` can be used to filter the results to only lines that contain the keyword.
 
+![Completed Logs Viewer](./logs_viewer.png)
+
 ## Implementation Notes
 
 I use a chunking strategy to read lines from the end of the file upwards until either the number of lines requested is reached or the beginning of the file is reached. This is done by reading chunks of the file from the end and splitting the chunk into lines. The lines are then reversed and returned.
@@ -9,10 +11,25 @@ I use a chunking strategy to read lines from the end of the file upwards until e
 ## Running the app
 
 Install rustup and cargo: https://rustup.rs/
-`cargo run --release`
 
-`curl "http://localhost:8080/logs?filename={logname}&last=10000000"`
-`curl "http://localhost:8080/logs?filename={logname}&last={last_n_entries}&keyword={keyword}"`
+```bash
+cargo run 8080 --release
+
+curl "http://localhost:8080/logs?filename={logname}&last=10000000"
+curl "http://localhost:8080/logs?filename={logname}&last={last_n_entries}&keyword={keyword}"
+```
+
+## Running the app's web interface
+
+Install yarn: https://yarnpkg.com/getting-started/install
+
+```bash
+cd site && yarn install
+cd ../
+chmod +x ./start.sh && ./start.sh
+```
+
+This will run 4 API servers on ports 8080, 8081, 8082, and 8083, and the development server for the web interface will be available at http://localhost:3000 (if it isn't already taken).
 
 ## Benchmarks
 
@@ -53,3 +70,12 @@ Shilin He, Jieming Zhu, Pinjia He, Michael R. Lyu. Loghub: A Large Collection of
 | HPC.log   | 31.99mb   | 10000          | 6.599458ms    |
 | HPC.log   | 31.99mb   | 100000         | 31.516458ms   |
 | HPC.log   | 31.99mb   | 433490         | 69.21975ms    |
+
+## TODO
+
+Tests!
+
+## Closing Thoughts
+
+The chunking strategy could become more sophisticated using multithreading and a bit of preprocessing of the logfile.
+The program currently spits out some metrics about its evaluation while running, which is useful for benchmarking those kinds of changes.
