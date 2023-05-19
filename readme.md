@@ -78,4 +78,7 @@ Tests!
 ## Closing Thoughts
 
 The chunking strategy could become more sophisticated using multithreading and a bit of preprocessing of the logfile.
+
+With a more sophisticated chunking strategy, advancing the filtering method is another candidate for optimization. Currently, I am unable to filter loglines as we fill the buffer up as a chunk may be split upon a single line. In other words, two chunks may contain the same line. If we were able to chunk the file in a way where we could guarantee a chunk would only contain full lines, we could filter the lines as we read them in. Part of this solution involves buffering incomplete lines between chunks. This solution would allow us to filter the lines as we read them in, but would require a little more memory. I believe that tradeoff between memory and speed would be worth it.
+
 The program currently spits out some metrics about its evaluation while running, which is useful for benchmarking those kinds of changes.
