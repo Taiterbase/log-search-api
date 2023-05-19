@@ -5,7 +5,7 @@ import { useState } from 'react';
 
 const Header = () => {
   return (
-    <div className="flex flex-row justify-between px-4 z-10 w-full items-center font-mono text-sm backdrop-blur-2xl">
+    <div className="flex flex-row justify-between px-4 z-10 w-full items-center font-mono text-sm backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800 dark:from-inherit">
       <Image
         src={'/cribl.svg'}
         alt="Cribl Logo"
@@ -14,7 +14,7 @@ const Header = () => {
         className="w-auto h-20"
         priority
       />
-      <p className="static w-auto rounded-xl border bg-gray-200 p-4 flex justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 backdrop-blur-2xl">
+      <p className="static w-auto rounded-xl border bg-gray-200 p-4 flex justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-300 dark:from-inherit">
         by&nbsp;
         <code className="font-mono font-bold"><a
           className="pointer-events-auto flex place-items-center gap-2 p-0"
@@ -55,9 +55,13 @@ export default function Home() {
         } else {
           setLogs(res)
         }
-      }).catch(err => console.log(err));
+      }).catch(err => {
+        console.log(err)
+        setLogs([err])
+      });
     } else {
-      console.log(res);
+      console.error(res);
+      setLogs([res.statusText]);
     }
   }
 
