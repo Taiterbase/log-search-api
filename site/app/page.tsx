@@ -42,7 +42,7 @@ export default function Home() {
       last: last.toString(),
       keyword: keyword,
     })
-    const res = await fetch(`http://localhost:8080/${multi ? "multi_logs" : "logs"}?${queryParams}`, {
+    const res = await fetch(`http://localhost:8080/${multi ? "multi-logs" : "logs"}?${queryParams}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

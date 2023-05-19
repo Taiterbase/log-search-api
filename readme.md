@@ -31,6 +31,12 @@ chmod +x ./start.sh && ./start.sh
 
 This will run 4 API servers on ports 8080, 8081, 8082, and 8083, and the development server for the web interface will be available at http://localhost:3000 (if it isn't already taken).
 
+You can test the multi-server API by running the following command:
+
+```bash
+curl "http://localhost:8080/multi-logs?filename={filename}&last={last_n_entries}&keyword={keyword}"
+```
+
 ## Benchmarks
 
 Tested on a M1 Pro Max with 32Gb of RAM.
