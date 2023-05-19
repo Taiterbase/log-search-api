@@ -13,8 +13,7 @@ struct LogsRequest {
     last: Option<usize>,
 }
 
-//const CHUNK_SIZE: u64 = 4096; // 4 KiB, can tweak as needed
-const CHUNK_SIZE: u64 = 4096;
+const CHUNK_SIZE: u64 = 2048;
 
 async fn log_lines(req: web::Query<LogsRequest>) -> Result<HttpResponse, io::Error> {
     let path = format!("/var/log/{}", req.filename);
@@ -86,9 +85,10 @@ async fn log_lines(req: web::Query<LogsRequest>) -> Result<HttpResponse, io::Err
     }
 
     let elapsed_time = start_time.elapsed();
+    let lines_read = lines.len();
     println!(
-        "{:?} ({:?}mb):\t{:?}",
-        &req.filename, file_size_mb, elapsed_time
+        "{:?} ({:?}mb): {:?} | {:?}",
+        &req.filename, file_size_mb, lines_read, elapsed_time
     );
 
     Ok(HttpResponse::Ok().json(lines))
