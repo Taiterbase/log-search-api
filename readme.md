@@ -1,3 +1,19 @@
+# Cribl Log Search
+
+CLS is a log searching API that exposes one endpoing `/logs` that accepts a `filename`, `last`, and `keyword` query parameter. The `filename` is the name of the log file to search and the `last` parameter is the number of lines to return from the end of the file. `keyword` can be used to filter the results to only lines that contain the keyword.
+
+## Implementation Notes
+
+I use a chunking strategy to read lines from the end of the file upwards until either the number of lines requested is reached or the beginning of the file is reached. This is done by reading chunks of the file from the end and splitting the chunk into lines. The lines are then reversed and returned.
+
+## Running the app
+
+Install rustup and cargo: https://rustup.rs/
+`cargo run --release`
+
+`curl "http://localhost:8080/logs?filename={logname}&last=10000000"`
+`curl "http://localhost:8080/logs?filename={logname}&last={last_n_entries}&keyword={keyword}"`
+
 ## Benchmarks
 
 Tested on a M1 Pro Max with 32Gb of RAM.
@@ -11,30 +27,29 @@ Shilin He, Jieming Zhu, Pinjia He, Michael R. Lyu. Loghub: A Large Collection of
 
 | File Name | File Size | Lines Returned | Query Latency |
 | --------- | --------- | -------------- | ------------- |
-| HDFS.log  | 1504.88mb | 100            | 1.041792ms    |
-| HDFS.log  | 1504.88mb | 1000           | 8.80775ms     |
-| HDFS.log  | 1504.88mb | 10000          | 35.814584ms   |
-| HDFS.log  | 1504.88mb | 100000         | 207.587042ms  |
-| HDFS.log  | 1504.88mb | 1000000        | 1.790500083s  |
-| HDFS.log  | 1504.88mb | 10000000       | 15.862125209s |
-| HDFS.log  | 1504.88mb | 11175630       | 16.738370792s |
+| HDFS.log  | 1504.88mb | 100            | 53.958µs      |
+| HDFS.log  | 1504.88mb | 1000           | 610.875µs     |
+| HDFS.log  | 1504.88mb | 10000          | 6.902167ms    |
+| HDFS.log  | 1504.88mb | 100000         | 33.906584ms   |
+| HDFS.log  | 1504.88mb | 1000000        | 204.017792ms  |
+| HDFS.log  | 1504.88mb | 10000000       | 1.989568459s  |
+| HDFS.log  | 1504.88mb | 11175630       | 2.256178333s  |
 
 #### Concurrent requests
 
 | File Name | File Size | Lines Returned | Concurrent Queries | Query Latency |
 | --------- | --------- | -------------- | ------------------ | ------------- |
-| HDFS.log  | 1504.88mb | 10000000       | 10                 | 16.307200708s |
-| HDFS.log  | 1504.88mb | 11175630       | 10                 | 19.376387916s |
+| HDFS.log  | 1504.88mb | 10000000       | 10                 | 2.005238875s  |
+| HDFS.log  | 1504.88mb | 11175630       | 10                 | 2.389033292s  |
 
-### HDFS.2 (Hadoop Distributed File System) 16.06GB
+### HPC (High Performance Computing) 32.00MB
 
-[src/main.rs:85] &req.filename = "install.log"
-[src/main.rs:85] elapsed_time = 572.818167ms
+[`curl "http://localhost:8080/logs?filename=test_logs/HPC.log&last=10000000"`
 
-### 3. Spark 2.75GB
-
-### 5. BGL (Blue Gene/L) 708.76MB
-
-### 6. HPC (High Performance Computing) 32.00MB
-
-### 7. Windows 26.09GB
+| File Name | File Size | Lines Returned | Query Latency |
+| --------- | --------- | -------------- | ------------- |
+| HPC.log   | 31.99mb   | 100            | 56.75µs       |
+| HPC.log   | 31.99mb   | 1000           | 291.708µs     |
+| HPC.log   | 31.99mb   | 10000          | 6.599458ms    |
+| HPC.log   | 31.99mb   | 100000         | 31.516458ms   |
+| HPC.log   | 31.99mb   | 433490         | 69.21975ms    |
