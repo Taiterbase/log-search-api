@@ -1,6 +1,6 @@
 # Cribl Log Search
 
-CLS is a log searching API that exposes one endpoing `/logs` that accepts a `filename`, `last`, and `keyword` query parameter. The `filename` is the name of the log file to search and the `last` parameter is the number of lines to return from the end of the file. `keyword` can be used to filter the results to only lines that contain the keyword.
+CLS is a log searching API that exposes one endpoint `/logs` that accepts a `filename`, `last`, and `keyword` query parameter. The `filename` is the name of the log file to search and the `last` parameter is the number of lines to return from the end of the file. `keyword` can be used to filter the results to only lines that contain the keyword.
 
 ![Completed Logs Viewer](./logs_viewer.png)
 
