@@ -5,7 +5,7 @@ import { useState } from 'react';
 
 const Header = () => {
   return (
-    <div className="flex flex-row justify-between px-4 z-10 w-full items-center font-mono text-sm backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800 dark:from-inherit">
+    <div className="sticky top-0 flex flex-row justify-between px-4 z-10 w-full items-center font-mono text-sm backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800 dark:from-inherit">
       <Image
         src={'/cribl.svg'}
         alt="Cribl Logo"
@@ -30,7 +30,7 @@ const Header = () => {
 export default function Home() {
   const [logs, setLogs] = useState<string[]>([]);
   const [multiLogs, setMultiLogs] = useState<string[][]>([]);
-  const [multi, setMulti] = useState(true);
+  const [multi, setMulti] = useState(false);
   const [filename, setFilename] = useState("");
   const [last, setLast] = useState(10);
   const [keyword, setKeyword] = useState("");
@@ -64,9 +64,9 @@ export default function Home() {
   }
 
   return (
-    <main className="flex overflow-scroll min-h-screen flex-col items-center justify-between">
+    <main className="flex w-full h-full overflow-auto min-h-screen flex-col items-center">
       <Header />
-      <form onSubmit={(e) => fetchLogs(e)} className="grid md:grid-cols-5 gap-y-4 md:gap-x-4 md:gap-y-0 my-4 p-4 items-center h-full w-9/12 mt-8 rounded shadow-md bg-neutral-100 px-8" >
+      <form onSubmit={(e) => fetchLogs(e)} className="mx-auto grid md:grid-cols-5 gap-y-4 md:gap-x-4 md:gap-y-0 my-4 p-4 items-center h-full w-11/12 md:w-9/12 mt-8 rounded-xl shadow-md bg-neutral-100 px-8" >
         <input className="p-2 w-full rounded bg-white border border-neutral-700" type="text" placeholder="filename" value={filename} onChange={(e) => setFilename(e.target.value)} />
         <input className="p-2 w-full rounded bg-white border border-neutral-700" type="number" placeholder="last" value={last} onChange={(e) => setLast(parseInt(e.target.value))} />
         <input className="p-2 w-full rounded bg-white border border-neutral-700" type="text" placeholder="keyword" value={keyword} onChange={(e) => setKeyword(e.target.value)} />
@@ -89,11 +89,11 @@ export default function Home() {
         <button className="bg-neutral-400 h-12 rounded-xl hover:bg-neutral-300" type="submit">Submit</button>
       </form>
 
-      <div className="mb-8 md:mt-8 h-[44rem] flex flex-col overflow-scroll text-neutral-300 shadow-2xl shadow-fuchsia-900 bg-neutral-700  w-11/12 p-6 rounded-b-xl rounded-xl md:w-9/12">
+      <div className="flex-grow grid gap-y-2 mx-auto mb-8 md:mt-8 rounded-xl text-neutral-300 shadow-2xl shadow-fuchsia-900 bg-neutral-700 w-11/12 p-3">
         {
           multi && multiLogs && multiLogs.map((l, i) => {
             return (
-              <div key={i} className="flex flex-col">
+              <div key={i} className="max-h-[30rem] overflow-auto bg-neutral-800 p-2 rounded">
                 <h2 className="font-medium text-lg">Server&nbsp;{i}</h2>
                 {
                   l.map((log, index) => {
@@ -107,11 +107,15 @@ export default function Home() {
           })
         }
         {
-          !multi && logs && logs.map((l, index) => {
-            return (
-              <pre key={index} className="text-left text-xs font-mono whitespace-pre-wrap">{l}</pre>
-            )
-          })
+          !multi && logs && <div className="bg-neutral-800 p-2 rounded flex flex-col">
+            {
+              !multi && logs && logs.map((l, index) => {
+                return (
+                  <pre key={index} className="text-left text-xs font-mono whitespace-pre-wrap">{l}</pre>
+                )
+              })
+            }
+          </div>
         }
       </div>
     </main >
