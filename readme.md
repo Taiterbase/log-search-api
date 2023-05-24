@@ -112,4 +112,4 @@ Shilin He, Jieming Zhu, Pinjia He, Michael R. Lyu. Loghub: A Large Collection of
 ## TODO
 
 - Tests!
-- Fix a bug in the Rust implementation, it doesn't like lines that are longer than the chunk size.
+- Benchmark against typescript!
