@@ -77,8 +77,6 @@ export async function getLogs(req: Request, res: Response, next: NextFunction) {
         return res.status(400).send('Bad Request');
     }
 
-    console.time('getLogsFromFile');
-
     const stats = statSync(logPath);
     const initialChunkSize = 8192; // 8KB
 
