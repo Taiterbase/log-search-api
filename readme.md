@@ -109,7 +109,43 @@ Shilin He, Jieming Zhu, Pinjia He, Michael R. Lyu. Loghub: A Large Collection of
 | HPC.log   | 31.99mb   | 100000         | 31.516458ms   |
 | HPC.log   | 31.99mb   | 433490         | 69.21975ms    |
 
+## Node Benchmarks
+
+### HDFS.1 (Hadoop Distributed File System) 1.47GB
+
+`curl "http://localhost:3001/logs?filename=test_logs/HDFS.log&last=10000000"`
+
+| File Name | File Size | Lines Returned | Query Latency |
+| --------- | --------- | -------------- | ------------- |
+| HDFS.log  | 1504.88mb | 100            | 178µs         |
+| HDFS.log  | 1504.88mb | 1000           | 533µs         |
+| HDFS.log  | 1504.88mb | 10000          | 6.457ms       |
+| HDFS.log  | 1504.88mb | 100000         | 37.659ms      |
+| HDFS.log  | 1504.88mb | 1000000        | 241.47ms      |
+| HDFS.log  | 1504.88mb | 10000000       | 2.425s        |
+| HDFS.log  | 1504.88mb | 11175630       | 3.231s        |
+
+#### Concurrent requests
+
+For `last` values of `1000000`, `10000000`, and `11175630` lengths, the Node server ran out of memory and crashed shortly after outputting its read time.
+
+### HPC (High Performance Computing) 32.00MB
+
+[`curl "http://localhost:8080/logs?filename=test_logs/HPC.log&last=10000000"`
+
+| File Name | File Size | Lines Returned | Query Latency |
+| --------- | --------- | -------------- | ------------- |
+| HPC.log   | 31.99mb   | 100            | 163µs         |
+| HPC.log   | 31.99mb   | 1000           | 534µs         |
+| HPC.log   | 31.99mb   | 10000          | 5.897ms       |
+| HPC.log   | 31.99mb   | 100000         | 33.938ms      |
+| HPC.log   | 31.99mb   | 433490         | 110.766ms     |
+
+## Rust Vs Node
+
+Rust is able to handle more concurrent requests than Node, and is able to handle larger files without running out of memory.
+Express.js and Node is faster for small concurrent requests smaller files, but Rust is faster for larger files. I may also not be configuring my Rust server correctly, so there is room for improvement.
+
 ## TODO
 
 - Tests!
-- Benchmark against typescript!

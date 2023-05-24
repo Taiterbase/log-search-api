@@ -80,9 +80,10 @@ export async function getLogs(req: Request, res: Response, next: NextFunction) {
     const stats = statSync(logPath);
     const initialChunkSize = 8192; // 8KB
 
+    console.time("fileRead");
+    const fd = openSync(logPath, 'r');
     let filePosition = stats.size; // Current position starts at end of the file
     let buffer = Buffer.alloc(initialChunkSize);
-    const fd = openSync(logPath, 'r');
     let lines: string[] = [];
     let lastLine = '';
     while (filePosition > 0) {
@@ -115,6 +116,7 @@ export async function getLogs(req: Request, res: Response, next: NextFunction) {
         filePosition -= chunkSize;
     }
     closeSync(fd);
+    console.timeEnd("fileRead");
 
     const response: LogsResponse = {
         status: 'fulfilled',
@@ -132,7 +134,10 @@ export const getMultiLogs = async (req: Request, res: Response, next: NextFuncti
         // Initiate concurrent requests to all secondary servers
         const serverRequests = servers.map(server =>
             axios.get(`${server}/logs`, { params: logsRequest })
-                .then(response => ({ status: 'fulfilled', server, data: response.data }))
+                .then(response => {
+                    let data = response.data;
+                    return { status: data.status, server, data: data.data } as LogsResponse;
+                })
                 .catch(error => {
                     console.error(`Server ${server} failed with error: ${error}`);
                     return { status: 'rejected', server, reason: error.message }

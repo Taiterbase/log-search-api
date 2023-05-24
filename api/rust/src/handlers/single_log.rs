@@ -83,6 +83,7 @@ pub async fn log_lines(req: web::Query<LogsRequest>) -> Result<HttpResponse, io:
         // greatly reduces the amount of lines we need to traverse
         if let Some(last) = req.last {
             if lines.len() >= last {
+                lines.truncate(last);
                 break;
             }
         }
@@ -96,10 +97,6 @@ pub async fn log_lines(req: web::Query<LogsRequest>) -> Result<HttpResponse, io:
                 .map_or(true, |keyword: &String| line.contains(keyword))
         })
         .collect();
-
-    if let Some(last) = req.last {
-        lines.truncate(last);
-    }
 
     let elapsed_time = start_time.elapsed();
     let lines_read = lines.len();

@@ -94,12 +94,12 @@ function getLogs(req, res, next) {
             console.error(`Path is outside of base directory: ${logPath}`);
             return res.status(400).send('Bad Request');
         }
-        console.time('getLogsFromFile');
         const stats = (0, fs_1.statSync)(logPath);
         const initialChunkSize = 8192; // 8KB
+        console.time("fileRead");
+        const fd = (0, fs_1.openSync)(logPath, 'r');
         let filePosition = stats.size; // Current position starts at end of the file
         let buffer = Buffer.alloc(initialChunkSize);
-        const fd = (0, fs_1.openSync)(logPath, 'r');
         let lines = [];
         let lastLine = '';
         while (filePosition > 0) {
@@ -128,6 +128,7 @@ function getLogs(req, res, next) {
             filePosition -= chunkSize;
         }
         (0, fs_1.closeSync)(fd);
+        console.timeEnd("fileRead");
         const response = {
             status: 'fulfilled',
             data: lines,
@@ -143,7 +144,10 @@ const getMultiLogs = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
     try {
         // Initiate concurrent requests to all secondary servers
         const serverRequests = servers.map(server => axios_1.default.get(`${server}/logs`, { params: logsRequest })
-            .then(response => ({ status: 'fulfilled', server, data: response.data }))
+            .then(response => {
+            let data = response.data;
+            return { status: data.status, server, data: data.data };
+        })
             .catch(error => {
             console.error(`Server ${server} failed with error: ${error}`);
             return { status: 'rejected', server, reason: error.message };
