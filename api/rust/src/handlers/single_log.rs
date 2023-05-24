@@ -7,7 +7,7 @@ use std::time::Instant;
 use std::path::PathBuf;
 
 
-const CHUNK_SIZE: u64 = 8192; // 8kb, works well for larger files
+const CHUNK_SIZE: u64 = 128; // 8kb, works well for larger files
 
 #[derive(Deserialize)]
 pub struct LogsRequest {
@@ -69,6 +69,7 @@ pub async fn log_lines(req: web::Query<LogsRequest>) -> Result<HttpResponse, io:
             .split(|b: &u8| *b == b'\n')
             .map(|s: &[u8]| String::from_utf8_lossy(s).into_owned())
             .collect();
+        chunk_lines.reverse();
 
 
         if let Some(mut leftover) = leftover_line.take() {
@@ -78,8 +79,6 @@ pub async fn log_lines(req: web::Query<LogsRequest>) -> Result<HttpResponse, io:
 
         leftover_line = chunk_lines.pop();
 
-        // newest lines to oldest lines
-        chunk_lines.reverse();
         lines.append(&mut chunk_lines);
 
         // fast path to return the last N lines

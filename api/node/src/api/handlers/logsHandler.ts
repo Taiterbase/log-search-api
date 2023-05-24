@@ -90,14 +90,13 @@ export async function getLogs(req: Request, res: Response, next: NextFunction) {
     while (filePosition > 0) {
         // Adjust chunk size for last chunk if it's smaller than initial chunk size
         let chunkSize = Math.min(initialChunkSize, filePosition);
-        console.log(`filePosition: ${filePosition}, chunkSize: ${chunkSize}, buffer.length: ${buffer.length}, size: ${stats.size}`)
         readSync(fd, buffer, 0, chunkSize, filePosition - chunkSize);
 
         // Split by any of the three types of end-of-line sequences
-        let chunkLines = buffer.toString().split(/\r?\n|\r/);
-        console.log(chunkLines);
+        let chunkLines = buffer.toString().split(/\r?\n|\r/).reverse();
+
         // If a line spans multiple chunks, append the remaining part from the last chunk.
-        chunkLines[0] = lastLine + chunkLines[0];
+        chunkLines[0] = chunkLines[0].concat(lastLine);
 
         // Store the last line of the current chunk as it may be the first part of a line that spans to the next chunk.
         lastLine = (chunkLines.pop() || '') + lastLine;
@@ -112,7 +111,7 @@ export async function getLogs(req: Request, res: Response, next: NextFunction) {
         // If 'last' is provided, limit output to last 'n' lines.
         // we can put this in the while condition but it's more readable here.
         if (last && lines.length >= last) {
-            lines = lines.slice(-last);
+            lines = lines.slice(0, last);
             break;
         }
         filePosition -= chunkSize;
@@ -121,7 +120,7 @@ export async function getLogs(req: Request, res: Response, next: NextFunction) {
 
     const response: LogsResponse = {
         status: 'fulfilled',
-        data: lines.reverse(),
+        data: lines,
     };
 
     res.send(response);

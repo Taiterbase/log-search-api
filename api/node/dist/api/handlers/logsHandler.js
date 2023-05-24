@@ -96,7 +96,7 @@ function getLogs(req, res, next) {
         }
         console.time('getLogsFromFile');
         const stats = (0, fs_1.statSync)(logPath);
-        const initialChunkSize = 128; // 8KB
+        const initialChunkSize = 8192; // 8KB
         let filePosition = stats.size; // Current position starts at end of the file
         let buffer = Buffer.alloc(initialChunkSize);
         const fd = (0, fs_1.openSync)(logPath, 'r');
@@ -105,13 +105,11 @@ function getLogs(req, res, next) {
         while (filePosition > 0) {
             // Adjust chunk size for last chunk if it's smaller than initial chunk size
             let chunkSize = Math.min(initialChunkSize, filePosition);
-            console.log(`filePosition: ${filePosition}, chunkSize: ${chunkSize}, buffer.length: ${buffer.length}, size: ${stats.size}`);
             (0, fs_1.readSync)(fd, buffer, 0, chunkSize, filePosition - chunkSize);
             // Split by any of the three types of end-of-line sequences
-            let chunkLines = buffer.toString().split(/\r?\n|\r/);
-            console.log(chunkLines);
+            let chunkLines = buffer.toString().split(/\r?\n|\r/).reverse();
             // If a line spans multiple chunks, append the remaining part from the last chunk.
-            chunkLines[0] = lastLine + chunkLines[0];
+            chunkLines[0] = chunkLines[0].concat(lastLine);
             // Store the last line of the current chunk as it may be the first part of a line that spans to the next chunk.
             lastLine = (chunkLines.pop() || '') + lastLine;
             // If 'keyword' is provided, filter lines by keyword.
@@ -124,7 +122,7 @@ function getLogs(req, res, next) {
             // If 'last' is provided, limit output to last 'n' lines.
             // we can put this in the while condition but it's more readable here.
             if (last && lines.length >= last) {
-                lines = lines.slice(-last);
+                lines = lines.slice(0, last);
                 break;
             }
             filePosition -= chunkSize;
@@ -132,7 +130,7 @@ function getLogs(req, res, next) {
         (0, fs_1.closeSync)(fd);
         const response = {
             status: 'fulfilled',
-            data: lines.reverse(),
+            data: lines,
         };
         res.send(response);
     });

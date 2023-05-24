@@ -13,7 +13,7 @@ I use a chunking strategy to read lines from the end of the file upwards until e
 Install rustup and cargo: https://rustup.rs/
 
 ```bash
-cd rust-api
+cd ./api/rust
 cargo run 8080 --release
 
 curl "http://localhost:8080/logs?filename={logname}&last=10000000"
@@ -22,10 +22,10 @@ curl "http://localhost:8080/logs?filename={logname}&last={last_n_entries}&keywor
 
 ## Running the node-api
 
-Install rustup and cargo: https://rustup.rs/
-
 ```bash
-PORT=3001 NODE_ENV=production node index.js
+cd ./api/node
+yarn build
+yarn start
 
 curl "http://localhost:3001/logs?filename={logname}&last=10000000"
 curl "http://localhost:3001/logs?filename={logname}&last={last_n_entries}&keyword={keyword}"
@@ -36,20 +36,40 @@ curl "http://localhost:3001/logs?filename={logname}&last={last_n_entries}&keywor
 Install yarn: https://yarnpkg.com/getting-started/install
 
 ```bash
-cd site && yarn install
-cd ../
-chmod +x ./start.sh && ./start.sh
+cd web
+yarn install
+yarn dev
 ```
 
-This will run 4 API servers on ports 8080, 8081, 8082, and 8083, and the development server for the web interface will be available at http://localhost:3000 (if it isn't already taken).
+## Running it all together
+
+```bash
+cd ./api/node
+yarn build
+cd ../../
+cd web
+yarn install
+cd ../
+yarn start
+```
+
+This will run 8 API servers in total on ports 8080, 8081, 8082, 8083, ports 3001, 3002, 3003, 3004, and the development server for the web interface will be available at http://localhost:3000 (if it isn't already taken).
 
 You can test the multi-server API by running the following command:
+
+#### Rust
 
 ```bash
 curl "http://localhost:8080/logs/multi?filename={filename}&last={last_n_entries}&keyword={keyword}"
 ```
 
-## Benchmarks
+#### Node
+
+```bash
+curl "http://localhost:3001/logs/multi?filename={filename}&last={last_n_entries}&keyword={keyword}"
+```
+
+## Rust Benchmarks
 
 Tested on a M1 Pro Max with 32Gb of RAM.
 
@@ -91,12 +111,5 @@ Shilin He, Jieming Zhu, Pinjia He, Michael R. Lyu. Loghub: A Large Collection of
 
 ## TODO
 
-Tests!
-
-## Closing Thoughts
-
-The chunking strategy could become more sophisticated using multithreading and a bit of preprocessing of the logfile.
-
-With a more sophisticated chunking strategy, advancing the filtering method is another candidate for optimization. Currently, I am unable to filter loglines as we fill the buffer up as a chunk may be split upon a single line. In other words, two chunks may contain the same line. If we were able to chunk the file in a way where we could guarantee a chunk would only contain full lines, we could filter the lines as we read them in. Part of this solution involves buffering incomplete lines between chunks. This solution would allow us to filter the lines as we read them in, but would require a little more memory. I believe that tradeoff between memory and speed would be worth it.
-
-The program currently spits out some metrics about its evaluation while running, which is useful for benchmarking those kinds of changes.
+- Tests!
+- Fix a bug in the Rust implementation, it doesn't like lines that are longer than the chunk size.
