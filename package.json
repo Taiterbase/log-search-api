@@ -1,5 +1,20 @@
 {
-  "dependencies": {
-    "clsx": "^1.2.1"
-  }
+    "name": "log-search",
+    "version": "0.0.1",
+    "scripts": {
+        "start:rust-api:8080": "cd ./api/rust && cargo run 8080 --release",
+        "start:rust-api:8081": "cd ./api/rust && cargo run 8081 --release",
+        "start:rust-api:8082": "cd ./api/rust && cargo run 8082 --release",
+        "start:rust-api:8083": "cd ./api/rust && cargo run 8083 --release",
+        "start:node-api:3000": "cd ./api/node && NODE_ENV=production PORT=3001 yarn start",
+        "start:node-api:3001": "cd ./api/node && NODE_ENV=production PORT=3002 yarn start",
+        "start:node-api:3002": "cd ./api/node && NODE_ENV=production PORT=3003 yarn start",
+        "start:node-api:3003": "cd ./api/node && NODE_ENV=production PORT=3004 yarn start",
+        "start:site": "cd web && yarn dev",
+        "start": "npm-run-all --parallel start:rust-api:* start:node-api:* start:site"
+    },
+    "devDependencies": {
+        "npm-run-all": "^4.1.5"
+    },
+    "dependencies": {}
 }

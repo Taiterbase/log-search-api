@@ -29,7 +29,7 @@ async fn main() -> io::Result<()> {
             )
             .route("/logs", web::get().to(handlers::single_log::log_lines))
             .route(
-                "/multi-logs",
+                "/logs/multi",
                 web::get().to(handlers::multi_log::multi_log_lines),
             )
             .service(Files::new("/", "/var/log").show_files_listing())

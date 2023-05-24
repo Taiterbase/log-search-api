@@ -1,9 +1,11 @@
 use actix_web::{web, HttpResponse, Result};
 use serde::Deserialize;
 use std::env::consts::OS;
-use std::fs::File;
+use std::fs::{canonicalize, File};
 use std::io::{self, Read, Seek, SeekFrom};
 use std::time::Instant;
+use std::path::PathBuf;
+
 
 const CHUNK_SIZE: u64 = 8192; // 8kb, works well for larger files
 
@@ -15,23 +17,25 @@ pub struct LogsRequest {
 }
 
 pub async fn log_lines(req: web::Query<LogsRequest>) -> Result<HttpResponse, io::Error> {
-    println!("single server request received");
-    let path = format!("/var/log/{}", req.filename);
-    let canonical_path = std::fs::canonicalize(&path)?;
+    let base_dir = match OS {
+        "macos" => "/private/var/log",
+        "linux" => "/var/log",
+        "windows" => "C:\\Windows\\System32\\config",
+        _ => return Ok(HttpResponse::BadRequest().body("Unsupported OS")),
+    };
+    
+    let mut path = PathBuf::from(base_dir);
+    path.push(req.filename.clone());
 
-    // Check if the canonical path still starts with the base directory path.
-    // This is a more robust check than a simple ".." containment check.
-    let base_dir = if OS == "macos" {
-        "/private/var/log/".to_string()
-    } else if OS == "linux" {
-        "/var/log/".to_string()
-    } else if OS == "windows" {
-        "C:\\Windows\\System32\\config\\".to_string()
-    } else {
-        return Ok(HttpResponse::BadRequest().body("Unsupported OS"));
+    let canonical_path = match canonicalize(&path) {
+        Ok(p) => p,
+        Err(_) => return Ok(HttpResponse::BadRequest().body("Invalid path")),
     };
 
-    if !canonical_path.starts_with(base_dir) {
+    let base_path = PathBuf::from(base_dir);
+
+    // Check if the canonical path starts with the base directory path.
+    if !canonical_path.starts_with(&base_path) {
         return Ok(HttpResponse::BadRequest().body("Bad Request"));
     }
 
@@ -44,6 +48,7 @@ pub async fn log_lines(req: web::Query<LogsRequest>) -> Result<HttpResponse, io:
     let mut buf: Vec<u8> = Vec::new();
     let mut lines: Vec<String> = Vec::new();
     let mut position: u64 = file.metadata()?.len();
+    let mut leftover_line: Option<String> = None;
 
     while position > 0 {
         let chunk_size: u64 = if position >= CHUNK_SIZE {
@@ -65,12 +70,13 @@ pub async fn log_lines(req: web::Query<LogsRequest>) -> Result<HttpResponse, io:
             .map(|s: &[u8]| String::from_utf8_lossy(s).into_owned())
             .collect();
 
-        if !lines.is_empty() {
-            // the first line may be incomplete, append it to the last line of the next chunk
-            let first_line = chunk_lines.pop().unwrap();
-            let last_line: &mut String = lines.last_mut().unwrap();
-            last_line.insert_str(0, &first_line);
+
+        if let Some(mut leftover) = leftover_line.take() {
+            leftover.push_str(&chunk_lines.pop().unwrap());
+            chunk_lines.push(leftover);
         }
+
+        leftover_line = chunk_lines.pop();
 
         // newest lines to oldest lines
         chunk_lines.reverse();

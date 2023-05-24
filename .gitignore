@@ -1,3 +1,7 @@
-/target
+rust-api/target
 .DS_Store
 test_data/
+node_modules/
+**/node_modules/
+**/target/
+

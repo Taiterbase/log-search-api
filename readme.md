@@ -8,15 +8,27 @@ CLS is a log searching API that exposes one endpoint `/logs` that accepts a `fil
 
 I use a chunking strategy to read lines from the end of the file upwards until either the number of lines requested is reached or the beginning of the file is reached. This is done by reading chunks of the file from the end and splitting the chunk into lines. The lines are then reversed and returned.
 
-## Running the app
+## Running the rust-api
 
 Install rustup and cargo: https://rustup.rs/
 
 ```bash
+cd rust-api
 cargo run 8080 --release
 
 curl "http://localhost:8080/logs?filename={logname}&last=10000000"
 curl "http://localhost:8080/logs?filename={logname}&last={last_n_entries}&keyword={keyword}"
+```
+
+## Running the node-api
+
+Install rustup and cargo: https://rustup.rs/
+
+```bash
+PORT=3001 NODE_ENV=production node index.js
+
+curl "http://localhost:3001/logs?filename={logname}&last=10000000"
+curl "http://localhost:3001/logs?filename={logname}&last={last_n_entries}&keyword={keyword}"
 ```
 
 ## Running the app's web interface
@@ -34,7 +46,7 @@ This will run 4 API servers on ports 8080, 8081, 8082, and 8083, and the develop
 You can test the multi-server API by running the following command:
 
 ```bash
-curl "http://localhost:8080/multi-logs?filename={filename}&last={last_n_entries}&keyword={keyword}"
+curl "http://localhost:8080/logs/multi?filename={filename}&last={last_n_entries}&keyword={keyword}"
 ```
 
 ## Benchmarks

@@ -60,14 +60,34 @@ export default function Home() {
       last: last.toString(),
       keyword: keyword,
     })
-    const res = await fetch(`http://localhost:8080/${multi ? "multi-logs" : "logs"}?${queryParams}`, {
+
+    // don't use the response from Node, but still make the retrieval
+    fetch(`http://localhost:3001/${multi ? "logs/multi" : "logs"}?${queryParams}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }).then((res) => {
+      if (res.ok) {
+        res.json().then((res) => {
+          console.log(res)
+        }).catch(err => {
+          console.log(err)
+        });
+      } else {
+        console.error(res);
+      }
+    })
+
+    // use the response from Rust
+    const rustRes = await fetch(`http://localhost:8080/${multi ? "logs/multi" : "logs"}?${queryParams}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
       },
     });
-    if (res.ok) {
-      res.json().then(res => {
+    if (rustRes.ok) {
+      rustRes.json().then(res => {
         if (multi) {
           setMultiLogs(res.map(JSON.parse))
         } else {
@@ -77,7 +97,7 @@ export default function Home() {
         console.log(err)
       });
     } else {
-      console.error(res);
+      console.error(rustRes);
     }
   }
 
