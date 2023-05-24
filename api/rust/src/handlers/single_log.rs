@@ -7,7 +7,7 @@ use std::time::Instant;
 use std::path::PathBuf;
 
 
-const CHUNK_SIZE: u64 = 128; // 8kb, works well for larger files
+const CHUNK_SIZE: u64 = 8192; // 8kb, works well for larger files
 
 #[derive(Deserialize)]
 pub struct LogsRequest {
@@ -71,13 +71,11 @@ pub async fn log_lines(req: web::Query<LogsRequest>) -> Result<HttpResponse, io:
             .collect();
         chunk_lines.reverse();
 
-
-        if let Some(mut leftover) = leftover_line.take() {
-            leftover.push_str(&chunk_lines.pop().unwrap());
-            chunk_lines.push(leftover);
+        if let Some(leftover) = leftover_line.take() {
+            chunk_lines[0] = chunk_lines[0].clone() + &leftover;
         }
 
-        leftover_line = chunk_lines.pop();
+        leftover_line = Some(chunk_lines.pop().unwrap_or_else(|| "".to_string()) + &leftover_line.unwrap_or_else(|| "".to_string()));
 
         lines.append(&mut chunk_lines);
 
