@@ -1,8 +1,8 @@
 # Log Search
 
-CLS is a log searching API that exposes an endpoint `/logs` that accepts a `filename`, `last`, and `keyword` query parameter. The `filename` is the name of the log file to search and the `last` parameter is the number of lines to return from the end of the file. `keyword` can be used to filter the results to only lines that contain the keyword. 
+CLS is a log searching API that exposes an endpoint `/logs` that accepts a `filename`, `last`, and `keyword` query parameter. The `filename` is the name of the log file to search and the `last` parameter is the number of lines to return from the end of the file. `keyword` can be used to filter the results to only lines that contain the keyword.
 
-There's another endpoint `/logs/multi` that accepts the same query parameters, but queries 4 node and 4 rust APIs to compare and benchmark their performance against each other. 
+There's another endpoint `/logs/multi` that accepts the same query parameters, but queries 4 node and 4 rust APIs to compare and benchmark their performance against each other.
 
 ![Completed Logs Viewer](./logs_viewer.png)
 
@@ -146,8 +146,30 @@ For `last` values of `1000000`, `10000000`, and `11175630` lengths, the Node ser
 ## Rust Vs Node
 
 Rust is able to handle more concurrent requests than Node, and is able to handle larger files without running out of memory.
-Express.js and Node is faster for small concurrent requests smaller files, but Rust is faster for larger files. I may also not be configuring my Rust server correctly, so there is room for improvement.
+Express.js and Node is faster for small concurrent requests smaller files, but Rust is faster for larger files. I may also not be configuring my Rust server correctly, as Express.js provides endpoint caching out-of-the-box, so there is definitely some room for improvement and fine-tuning!
 
-## TODO
+## Future Improvements
 
-- Tests!
+- Tests :^)
+
+- File perms: Add error handling to catch permission-related errors for requested files.
+
+- Writing while reading: Logs are often written to while being read. May want to handle a couple scenarios where the log is being written to while the program reads it by applying a mutex lock to the file.
+
+- Large 'last' Parameter: Add a reasonable `max` limit to avoid large requests that could cause the server to run out of memory.
+
+- Binary Files: Maybe consider checking file types before reading them if the log files contain non-UTF8 characters or binary data.
+
+- Pagination: If the logs are large, or a large `last` parameter is provided, returning all loglines at once isn't feasible. Pagination would allow clients to request logs in batches.
+
+- Time Range: If log entries are timestamped and users are interested, adding support for a query span might be interesting.
+
+- Level Filter: Sometimes loglines have severity levels (ERROR, WARN, INFO, DEBUG, etc.) that users might want to explicitly query for.
+
+- Live Streaming: For real-time applications, users might want the ability for clients to "subscribe" to a log file and get updates in real time, as logs are written to the log.
+
+- Text Search: Instead of just keyword matching, users might want to search for logs that match a certain regular expression, or use boolean operators to combine different search terms.
+
+- Sorting: It could be useful to sort log entries by various fields, like timestamp, severity level, etc.
+
+- Tagging: Users might want to tag certain log entries and query for logs that have been tagged with a certain tag.
