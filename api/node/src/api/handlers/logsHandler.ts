@@ -44,7 +44,7 @@ export async function getLogs(req: Request, res: Response, next: NextFunction) {
         return res.status(400).send("Missing filename");
     }
 
-    // can add support for other operating systems, but keep in mind two things:
+    // Can add support for other operating systems, but keep in mind two things:
     // the path to the log files may be different, and the log files may have different line endings
     let baseDir: string;
     switch (process.platform) {

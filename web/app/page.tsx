@@ -71,9 +71,9 @@ export default function Home() {
       if (res.ok) {
         res.json().then((res) => {
           if (multi) {
-            //setMultiLogs(res.map((log: any) => log.value.data));
+            setMultiLogs(res.map((log: any) => log.value.data));
           } else {
-            //setLogs(res.data)
+            setLogs(res.data)
           }
         }).catch(err => {
           console.log(err)
@@ -92,7 +92,6 @@ export default function Home() {
     });
     if (rustRes.ok) {
       rustRes.json().then(res => {
-        //console.log(res)
         /* if (multi) {
           setMultiLogs(res.map(JSON.parse))
         } else {
