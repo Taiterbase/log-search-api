@@ -1,6 +1,8 @@
 # Log Search
 
-CLS is a log searching API that exposes one endpoint `/logs` that accepts a `filename`, `last`, and `keyword` query parameter. The `filename` is the name of the log file to search and the `last` parameter is the number of lines to return from the end of the file. `keyword` can be used to filter the results to only lines that contain the keyword.
+CLS is a log searching API that exposes an endpoint `/logs` that accepts a `filename`, `last`, and `keyword` query parameter. The `filename` is the name of the log file to search and the `last` parameter is the number of lines to return from the end of the file. `keyword` can be used to filter the results to only lines that contain the keyword. 
+
+There's another endpoint `/logs/multi` that accepts the same query parameters, but queries 4 node and 4 rust APIs to compare and benchmark their performance against each other. 
 
 ![Completed Logs Viewer](./logs_viewer.png)
 
