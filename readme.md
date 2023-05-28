@@ -1,14 +1,8 @@
 # Log Search
 
-CLS is a log searching API that exposes an endpoint `/logs` that accepts a `filename`, `last`, and `keyword` query parameter. The `filename` is the name of the log file to search and the `last` parameter is the number of lines to return from the end of the file. `keyword` can be used to filter the results to only lines that contain the keyword.
-
-There's another endpoint `/logs/multi` that accepts the same query parameters, but queries 4 node and 4 rust APIs to compare and benchmark their performance against each other.
+Search logs on a server (or multiple servers??), and do it remotely with a web interface! These two implementations in Rust and Typescript work a chunking strategy to iterate from the end of a log file to the beginning with query parameters to filter and list the last `n` lines of the filename you pass in.
 
 ![Completed Logs Viewer](./logs_viewer.png)
-
-## Implementation Notes
-
-I use a chunking strategy to read lines from the end of the file upwards until either the number of lines requested is reached or the beginning of the file is reached. This is done by reading chunks of the file from the end and splitting the chunk into lines. The lines are then reversed and returned.
 
 ## Running the rust-api
 
@@ -55,9 +49,9 @@ cd ../
 yarn start
 ```
 
-This will run 8 API servers in total on ports 8080, 8081, 8082, 8083, ports 3001, 3002, 3003, 3004, and the development server for the web interface will be available at http://localhost:3000 (if it isn't already taken).
+This will run 8 API servers in total on ports 8080, 8081, 8082, 8083, ports 3001, 3002, 3003, 3004, and the development server for the web interface will be available at http://localhost:3000 (if it isn't already taken). Feel free to change them. 
 
-You can test the multi-server API by running the following command:
+You can test the multi-server API by running the following command or using the web interface:
 
 #### Rust
 
@@ -145,12 +139,11 @@ For `last` values of `1000000`, `10000000`, and `11175630` lengths, the Node ser
 
 ## Rust Vs Node
 
-Rust is able to handle more concurrent requests than Node, and is able to handle larger files without running out of memory.
-Express.js and Node is faster for small concurrent requests smaller files, but Rust is faster for larger files. I may also not be configuring my Rust server correctly, as Express.js provides endpoint caching out-of-the-box, so there is definitely some room for improvement and fine-tuning!
+In order for Node.js to handle larger chunks of data, a streaming API might be necessary. Currently the Node API fails after ~600mb of data is queried for. The Rust API can handle the maximum test of 1.5gb. A streaming API would help the Node implementation handle the communication of chunks to the frontend and might allow it to surpass my trivial Rust server in some instances. RxJS might be a good candidate for this. A simple Observable / Observer model with this chunking strategy could improve the memory usage greatly — most all performance gains in Javascript come from less memory usage. 
 
 ## Future Improvements
 
-- Tests :^)
+- Tests!
 
 - File perms: Add error handling to catch permission-related errors for requested files.
 
