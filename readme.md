@@ -1,6 +1,10 @@
 # Log Search
 
-Search logs on a server (or multiple servers??), and do it remotely with a web interface! These two implementations in Rust and Typescript work a chunking strategy to iterate from the end of a log file to the beginning with query parameters to filter and list the last `n` lines of the filename you pass in.
+Search logs on multiple servers and do it remotely with a web interface! 
+
+These two implementations in Rust and Typescript perform a simple chunking strategy to iterate from the end of a log file to the beginning with query parameters to filter and list the last `n` lines of the filename you pass in.
+
+I am not a Rust engineer.
 
 ![Completed Logs Viewer](./logs_viewer.png)
 
